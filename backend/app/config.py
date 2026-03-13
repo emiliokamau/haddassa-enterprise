@@ -9,11 +9,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 
+def _normalize_database_url(database_url: str) -> str:
+    # Render Postgres URLs may be provided as postgres:// or postgresql://.
+    if database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+    return database_url
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        "mysql+pymysql://root:42125811Kamau@localhost:3760/hadassah_enterprises",
+    SQLALCHEMY_DATABASE_URI = _normalize_database_url(
+        os.getenv(
+            "DATABASE_URL",
+            "mysql+pymysql://root:42125811Kamau@localhost:3760/hadassah_enterprises",
+        )
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

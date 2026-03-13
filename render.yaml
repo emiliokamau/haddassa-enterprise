@@ -1,3 +1,9 @@
+databases:
+  - name: hadassah-enterprises-db
+    plan: free
+    databaseName: hadassah_enterprises
+    user: hadassah_user
+
 services:
   - type: web
     name: hadassah-enterprises
@@ -18,7 +24,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: hadassah-enterprises-db
+          property: connectionString
       - key: SUPPORT_EMAIL
         sync: false
       - key: WHATSAPP_NUMBER
