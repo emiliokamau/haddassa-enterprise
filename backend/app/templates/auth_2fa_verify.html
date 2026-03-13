@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Two-Factor Verification | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Two-Factor Verification</h1>
+    <p>Enter the one-time code from your authenticator app to complete sign in.</p>
+
+    <form method="post" class="contact-form" novalidate>
+        {{ form.hidden_tag() }}
+
+        <label for="otp_code">Authentication Code</label>
+        {{ form.otp_code(id='otp_code', autocomplete='one-time-code', inputmode='numeric', placeholder='123456') }}
+        {% for error in form.otp_code.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        {{ form.submit(class_='button') }}
+    </form>
+
+    <form method="post" action="{{ url_for('auth.resend_login_two_factor_sms') }}" class="section-gap inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button button-outline">Resend SMS Code</button>
+    </form>
+
+    <p class="muted section-gap">If your code is not working, wait for the next code and try again.</p>
+</section>
+{% endblock %}

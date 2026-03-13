@@ -25,3 +25,29 @@ services:
         sync: false
       - key: ADMIN_EMAIL
         sync: false
+      - key: EMAIL_PROVIDER
+        value: sendgrid
+      - key: ENABLE_EMAIL_NOTIFICATIONS
+        value: true
+      - key: FROM_EMAIL
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_CONFIRMATION_REQUIRED
+        value: true
+      - key: ENABLE_SMS_OTP
+        value: true
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: ENABLE_TWILIO_WHATSAPP
+        value: true
+      - key: TWILIO_WHATSAPP_FROM_NUMBER
+        value: whatsapp:+14155238886
+      - key: TWILIO_WHATSAPP_BOOKING_CONTENT_SID
+        sync: false

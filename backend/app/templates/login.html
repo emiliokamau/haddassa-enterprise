@@ -20,5 +20,12 @@
 
         {{ form.submit(class_='button') }}
     </form>
+
+    <p class="section-gap">
+        <a href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+    </p>
+    <p>
+        <a href="{{ url_for('auth.resend_confirmation') }}">Resend email confirmation</a>
+    </p>
 </section>
 {% endblock %}

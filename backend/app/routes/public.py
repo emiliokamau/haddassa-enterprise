@@ -7,6 +7,8 @@ from wtforms import DateField, SelectField, StringField, SubmitField, TextAreaFi
 from wtforms.validators import DataRequired, Email, Length, Optional, Regexp, ValidationError
 
 from ..models import ConsultationBooking, ContactSubmission, NewsletterSubscriber, db
+from ..services.email import send_email
+from ..services.whatsapp import send_whatsapp_template, send_whatsapp_text
 
 public_bp = Blueprint("public", __name__)
 
@@ -61,6 +63,37 @@ def _normalized_whatsapp_number(raw_number: str) -> str:
     return "".join(ch for ch in raw_number if ch.isdigit())
 
 
+def _notify_support(subject: str, message: str):
+    support_email = (current_app.config.get("SUPPORT_EMAIL") or "").strip()
+    if not support_email:
+        return False
+    return send_email(to_email=support_email, subject=subject, text_body=message)
+
+
+def _send_booking_whatsapp_confirmation(booking: ConsultationBooking):
+    content_sid = (current_app.config.get("TWILIO_WHATSAPP_BOOKING_CONTENT_SID") or "").strip()
+    preferred_date = booking.preferred_date.strftime("%m/%d")
+    preferred_time = booking.preferred_time.strftime("%I:%M %p").lstrip("0")
+
+    if content_sid:
+        content_variables = {"1": preferred_date, "2": preferred_time}
+        return send_whatsapp_template(
+            to_number=booking.phone,
+            content_sid=content_sid,
+            content_variables=content_variables,
+        )
+
+    # Fallback to plain WhatsApp text if template Content SID is not configured yet.
+    return send_whatsapp_text(
+        to_number=booking.phone,
+        body=(
+            "Hadassah Enterprises booking received. "
+            f"Preferred slot: {preferred_date} at {preferred_time}. "
+            "We will confirm shortly."
+        ),
+    )
+
+
 @public_bp.route("/")
 def home():
     return render_template("home.html")
@@ -93,6 +126,16 @@ def contact():
         )
         db.session.add(submission)
         db.session.commit()
+
+        _notify_support(
+            subject="New Website Contact Submission",
+            message=(
+                f"Name: {submission.name}\n"
+                f"Email: {submission.email}\n"
+                f"Phone: {submission.phone or 'N/A'}\n"
+                f"Message:\n{submission.message}"
+            ),
+        )
 
         support_email = current_app.config.get("SUPPORT_EMAIL")
         whatsapp_number = _normalized_whatsapp_number(current_app.config.get("WHATSAPP_NUMBER", ""))
@@ -136,6 +179,20 @@ def book_consultation():
         )
         db.session.add(booking)
         db.session.commit()
+
+        _notify_support(
+            subject="New Consultation Booking",
+            message=(
+                f"Name: {booking.full_name}\n"
+                f"Email: {booking.email}\n"
+                f"Phone: {booking.phone}\n"
+                f"Service: {booking.service_interest}\n"
+                f"Preferred Date: {booking.preferred_date}\n"
+                f"Preferred Time: {booking.preferred_time}\n"
+                f"Notes: {booking.notes or 'N/A'}"
+            ),
+        )
+        _send_booking_whatsapp_confirmation(booking)
         return redirect(url_for("public.booking_confirmation", booking_id=booking.id))
 
     return render_template("book_consultation.html", form=form)
@@ -173,6 +230,19 @@ def subscribe_newsletter():
     )
     db.session.add(subscriber)
     db.session.commit()
+
+    send_email(
+        to_email=subscriber.email,
+        subject="You are subscribed to Hadassah monthly updates",
+        text_body=(
+            "Thank you for subscribing. You will receive monthly reminders on tax returns, "
+            "filing deadlines, and compliance updates."
+        ),
+    )
+    _notify_support(
+        subject="New Trusted Newsletter Subscriber",
+        message=f"{subscriber.full_name} <{subscriber.email}> subscribed to monthly updates.",
+    )
 
     flash("Subscribed successfully. You will receive monthly filing and returns updates.", "success")
     return redirect(request.referrer or url_for("public.home"))

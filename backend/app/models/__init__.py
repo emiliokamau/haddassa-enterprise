@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+import pyotp
 from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
@@ -15,6 +16,11 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(50), nullable=False, default="client")
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+    email_confirmed = db.Column(db.Boolean, nullable=False, default=False)
+    email_confirmed_at = db.Column(db.DateTime, nullable=True)
+    two_factor_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    two_factor_secret = db.Column(db.String(32), nullable=True)
+    email_notifications_enabled = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     client_profile = db.relationship(
@@ -26,6 +32,20 @@ class User(UserMixin, db.Model):
 
     def check_password(self, raw_password):
         return check_password_hash(self.password_hash, raw_password)
+
+    def ensure_totp_secret(self):
+        if not self.two_factor_secret:
+            self.two_factor_secret = pyotp.random_base32()
+        return self.two_factor_secret
+
+    def get_totp_uri(self, issuer_name="Hadassah Enterprises"):
+        secret = self.ensure_totp_secret()
+        return pyotp.totp.TOTP(secret).provisioning_uri(name=self.email, issuer_name=issuer_name)
+
+    def verify_totp(self, code):
+        if not self.two_factor_secret:
+            return False
+        return pyotp.TOTP(self.two_factor_secret).verify((code or "").strip(), valid_window=1)
 
     @property
     def is_admin(self):

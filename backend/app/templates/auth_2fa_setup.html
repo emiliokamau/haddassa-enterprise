@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Set Up Two-Factor Authentication | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Set Up Two-Factor Authentication</h1>
+    <p>Scan the setup details below in your authenticator app, then enter the current code to enable 2FA.</p>
+
+    <div class="summary-card">
+        <p><strong>Secret Key:</strong> {{ totp_secret }}</p>
+        <p class="muted">If your authenticator app supports setup links, use this URI:</p>
+        <p class="muted" style="word-break: break-all;">{{ qr_uri }}</p>
+    </div>
+
+    <form method="post" class="contact-form" novalidate>
+        {{ form.hidden_tag() }}
+
+        <label for="otp_code">Authentication Code</label>
+        {{ form.otp_code(id='otp_code', autocomplete='one-time-code', inputmode='numeric', placeholder='123456') }}
+        {% for error in form.otp_code.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        {{ form.submit(class_='button') }}
+    </form>
+
+    <form method="post" action="{{ url_for('auth.disable_two_factor') }}" class="section-gap inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button button-outline">Disable 2FA</button>
+    </form>
+</section>
+{% endblock %}

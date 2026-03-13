@@ -49,6 +49,29 @@ class Config:
     X_FRAME_OPTIONS = "DENY"
     REFERRER_POLICY = "strict-origin-when-cross-origin"
 
+    # Email API integration (Resend)
+    ENABLE_EMAIL_NOTIFICATIONS = os.getenv("ENABLE_EMAIL_NOTIFICATIONS", "true").lower() == "true"
+    EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "resend").lower()
+    RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+    SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
+    FROM_EMAIL = os.getenv("FROM_EMAIL", "noreply@hadassahenterprises.co.ke")
+
+    # Account security flows
+    EMAIL_CONFIRMATION_REQUIRED = os.getenv("EMAIL_CONFIRMATION_REQUIRED", "true").lower() == "true"
+    EMAIL_TOKEN_MAX_AGE_SECONDS = int(os.getenv("EMAIL_TOKEN_MAX_AGE_SECONDS", "86400"))
+    PASSWORD_RESET_TOKEN_MAX_AGE_SECONDS = int(os.getenv("PASSWORD_RESET_TOKEN_MAX_AGE_SECONDS", "3600"))
+
+    # Optional Twilio SMS one-time code flow
+    ENABLE_SMS_OTP = os.getenv("ENABLE_SMS_OTP", "false").lower() == "true"
+    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+    TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", "")
+
+    # Optional Twilio WhatsApp template messaging (Content API)
+    ENABLE_TWILIO_WHATSAPP = os.getenv("ENABLE_TWILIO_WHATSAPP", "false").lower() == "true"
+    TWILIO_WHATSAPP_FROM_NUMBER = os.getenv("TWILIO_WHATSAPP_FROM_NUMBER", "whatsapp:+14155238886")
+    TWILIO_WHATSAPP_BOOKING_CONTENT_SID = os.getenv("TWILIO_WHATSAPP_BOOKING_CONTENT_SID", "")
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
