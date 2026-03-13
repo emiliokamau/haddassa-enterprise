@@ -30,7 +30,7 @@ class Config:
 
     SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "emiliokamau35@gmail.com")
     WHATSAPP_NUMBER = os.getenv("WHATSAPP_NUMBER", "254796526647")
-    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "kamauemilio466@gmail.com").lower()
+    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "kamau.emilio@s.karu.ac.ke").lower()
 
     UPLOAD_FOLDER = str(BASE_DIR / "uploads")
     MAX_CONTENT_LENGTH = int(os.getenv("MAX_UPLOAD_MB", "10")) * 1024 * 1024
@@ -65,7 +65,7 @@ class Config:
     EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "resend").lower()
     RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
     SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
-    FROM_EMAIL = os.getenv("FROM_EMAIL", "kamauemilio466@gmail.com")
+    FROM_EMAIL = os.getenv("FROM_EMAIL", "emiliokamau35@gmail.com")
 
     # Account security flows
     EMAIL_CONFIRMATION_REQUIRED = os.getenv("EMAIL_CONFIRMATION_REQUIRED", "true").lower() == "true"
