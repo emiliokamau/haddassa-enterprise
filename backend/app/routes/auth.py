@@ -180,8 +180,15 @@ def register():
         db.session.commit()
 
         if current_app.config.get("EMAIL_CONFIRMATION_REQUIRED", True):
-            _send_confirmation_email(user)
-            flash("Account created. Please check your email to confirm your account before signing in.", "success")
+            sent = _send_confirmation_email(user)
+            if sent:
+                flash("Account created. Please check your email to confirm your account before signing in.", "success")
+            else:
+                flash(
+                    "Account created, but we could not send the confirmation email right now. "
+                    "Please use Resend email confirmation.",
+                    "error",
+                )
         else:
             flash("Account created. You can now sign in.", "success")
         return redirect(url_for("auth.login"))
@@ -379,7 +386,9 @@ def resend_confirmation():
         email = form.email.data.strip().lower()
         user = User.query.filter_by(email=email).first()
         if user and not user.email_confirmed:
-            _send_confirmation_email(user)
+            sent = _send_confirmation_email(user)
+            if not sent:
+                current_app.logger.warning("Confirmation email resend failed for user_id=%s", user.id)
 
         flash("If an account exists and is unconfirmed, a new confirmation email has been sent.", "success")
         return redirect(url_for("auth.login"))
@@ -397,7 +406,9 @@ def forgot_password():
         email = form.email.data.strip().lower()
         user = User.query.filter_by(email=email).first()
         if user and user.is_active:
-            _send_password_reset_email(user)
+            sent = _send_password_reset_email(user)
+            if not sent:
+                current_app.logger.warning("Password reset email send failed for user_id=%s", user.id)
 
         flash("If an account exists for this email, a password reset link has been sent.", "success")
         return redirect(url_for("auth.login"))

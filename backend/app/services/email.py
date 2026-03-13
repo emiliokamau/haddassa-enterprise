@@ -60,7 +60,17 @@ def _send_via_resend(to_email, from_email, subject, text_body, html_body=None):
         with request.urlopen(req, timeout=10) as resp:
             return 200 <= resp.status < 300
     except error.HTTPError as exc:
-        current_app.logger.error("Resend API HTTP error: %s", exc)
+        response_body = ""
+        try:
+            response_body = exc.read().decode("utf-8", errors="ignore")
+        except Exception:
+            response_body = "<unavailable>"
+        current_app.logger.error(
+            "Resend API HTTP error: status=%s reason=%s body=%s",
+            getattr(exc, "code", "?"),
+            getattr(exc, "reason", exc),
+            response_body,
+        )
     except error.URLError as exc:
         current_app.logger.error("Resend API connection error: %s", exc)
 
@@ -98,7 +108,17 @@ def _send_via_sendgrid(to_email, from_email, subject, text_body, html_body=None)
         with request.urlopen(req, timeout=10) as resp:
             return 200 <= resp.status < 300
     except error.HTTPError as exc:
-        current_app.logger.error("SendGrid API HTTP error: %s", exc)
+        response_body = ""
+        try:
+            response_body = exc.read().decode("utf-8", errors="ignore")
+        except Exception:
+            response_body = "<unavailable>"
+        current_app.logger.error(
+            "SendGrid API HTTP error: status=%s reason=%s body=%s",
+            getattr(exc, "code", "?"),
+            getattr(exc, "reason", exc),
+            response_body,
+        )
     except error.URLError as exc:
         current_app.logger.error("SendGrid API connection error: %s", exc)
 

@@ -65,7 +65,7 @@ class Config:
     EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "resend").lower()
     RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
     SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
-    FROM_EMAIL = os.getenv("FROM_EMAIL", "noreply@hadassahenterprises.co.ke")
+    FROM_EMAIL = os.getenv("FROM_EMAIL", "kamauemilio466@gmail.com")
 
     # Account security flows
     EMAIL_CONFIRMATION_REQUIRED = os.getenv("EMAIL_CONFIRMATION_REQUIRED", "true").lower() == "true"
