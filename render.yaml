@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: hadassah-enterprises
+    env: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    preDeployCommand: flask --app run.py db upgrade
+    healthCheckPath: /health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SESSION_COOKIE_SECURE
+        value: true
+      - key: ENABLE_SECURITY_HEADERS
+        value: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: WHATSAPP_NUMBER
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Consultation | Hadassah Enterprises{% endblock %}
+{% block meta_description %}Book a consultation for tax and accountancy support.{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Book a Consultation</h1>
+    <p>Choose your preferred date and time. We will confirm availability promptly.</p>
+
+    <form method="post" class="contact-form" novalidate>
+        {{ form.hidden_tag() }}
+
+        <label for="full_name">Full Name</label>
+        {{ form.full_name(id='full_name', autocomplete='name') }}
+        {% for error in form.full_name.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        <label for="email">Email</label>
+        {{ form.email(id='email', autocomplete='email') }}
+        {% for error in form.email.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        <label for="phone">Phone</label>
+        {{ form.phone(id='phone', autocomplete='tel', placeholder='+254...') }}
+        {% for error in form.phone.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        <label for="service_interest">Service of Interest</label>
+        {{ form.service_interest(id='service_interest') }}
+        {% for error in form.service_interest.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        <div class="form-row">
+            <div>
+                <label for="preferred_date">Preferred Date</label>
+                {{ form.preferred_date(id='preferred_date') }}
+                {% for error in form.preferred_date.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            </div>
+            <div>
+                <label for="preferred_time">Preferred Time</label>
+                {{ form.preferred_time(id='preferred_time') }}
+                {% for error in form.preferred_time.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            </div>
+        </div>
+
+        <label for="notes">Notes (optional)</label>
+        {{ form.notes(id='notes', rows='5', placeholder='Tell us about your needs...') }}
+        {% for error in form.notes.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        {{ form.submit(class_='button') }}
+    </form>
+</section>
+{% endblock %}

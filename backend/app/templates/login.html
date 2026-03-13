@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Sign In</h1>
+    <p>Sign in to access your client or admin dashboard.</p>
+
+    <form method="post" class="contact-form" novalidate>
+        {{ form.hidden_tag() }}
+
+        <label for="email">Email</label>
+        {{ form.email(id='email', autocomplete='email') }}
+        {% for error in form.email.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        <label for="password">Password</label>
+        {{ form.password(id='password', autocomplete='current-password') }}
+        {% for error in form.password.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+
+        {{ form.submit(class_='button') }}
+    </form>
+</section>
+{% endblock %}

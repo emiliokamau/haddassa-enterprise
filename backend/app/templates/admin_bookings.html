@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Bookings | Admin | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Consultation Bookings</h1>
+
+    <nav class="filter-tabs section-gap">
+        <a href="{{ url_for('admin.bookings') }}"
+           class="tab{% if not current_status %} tab-active{% endif %}">All</a>
+        {% for s in statuses %}
+        <a href="{{ url_for('admin.bookings', status=s) }}"
+           class="tab{% if current_status == s %} tab-active{% endif %}">
+            {{ s.replace('_', ' ').title() }}
+        </a>
+        {% endfor %}
+    </nav>
+
+    {% if bookings %}
+    <div class="table-wrap section-gap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Service</th>
+                <th>Date &amp; Time</th>
+                <th>Status</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for b in bookings %}
+        <tr>
+            <td>{{ b.full_name }}</td>
+            <td>{{ b.email }}</td>
+            <td>{{ b.phone }}</td>
+            <td>{{ b.service_interest }}</td>
+            <td>{{ b.preferred_date.strftime('%d %b %Y') }} {{ b.preferred_time.strftime('%H:%M') }}</td>
+            <td><span class="status-badge status-{{ b.status }}">{{ b.status.replace('_', ' ').title() }}</span></td>
+            <td>
+                <form method="post"
+                      action="{{ url_for('admin.update_booking_status', booking_id=b.id) }}"
+                      class="inline-status-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="status" class="status-select">
+                        {% for s in statuses %}
+                        <option value="{{ s }}"{% if b.status == s %} selected{% endif %}>
+                            {{ s.replace('_', ' ').title() }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="button">Save</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="muted section-gap">No bookings found{% if current_status %} with status "{{ current_status.replace('_', ' ') }}"{% endif %}.</p>
+    {% endif %}
+</section>
+{% endblock %}

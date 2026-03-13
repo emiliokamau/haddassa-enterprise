@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Clients | Admin | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Clients</h1>
+
+    <form method="get" action="{{ url_for('admin.clients') }}" class="search-form">
+        <input type="search" name="q" value="{{ q }}" placeholder="Search by company or email…" class="search-input">
+        <button type="submit" class="button">Search</button>
+        {% if q %}<a href="{{ url_for('admin.clients') }}" class="button button-outline">Clear</a>{% endif %}
+    </form>
+
+    {% if profiles %}
+    <div class="table-wrap section-gap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Filings</th>
+                <th>Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in profiles %}
+        <tr>
+            <td>{{ p.company_name }}</td>
+            <td>{{ p.user.email }}</td>
+            <td>{{ p.contact_phone or '—' }}</td>
+            <td>{{ p.filings|length }}</td>
+            <td>{{ p.created_at.strftime('%d %b %Y') }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% elif q %}
+    <p class="muted section-gap">No results for "{{ q }}".</p>
+    {% else %}
+    <p class="muted section-gap">No client profiles found.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,128 @@
+from datetime import datetime
+
+from flask_login import UserMixin
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash, generate_password_hash
+
+db = SQLAlchemy()
+
+
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(50), nullable=False, default="client")
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    client_profile = db.relationship(
+        "ClientProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+
+    def set_password(self, raw_password):
+        self.password_hash = generate_password_hash(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password_hash(self.password_hash, raw_password)
+
+    @property
+    def is_admin(self):
+        return self.role == "admin"
+
+
+class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    action = db.Column(db.String(100), nullable=False)
+    entity_type = db.Column(db.String(50), nullable=True)
+    entity_id = db.Column(db.Integer, nullable=True)
+    details = db.Column(db.Text, nullable=True)  # JSON string
+    ip_address = db.Column(db.String(45), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    user = db.relationship("User", backref=db.backref("audit_logs", lazy="dynamic"))
+
+
+class ClientProfile(db.Model):
+    __tablename__ = "client_profiles"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), unique=True, nullable=False)
+    company_name = db.Column(db.String(255), nullable=False)
+    contact_phone = db.Column(db.String(50), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", back_populates="client_profile")
+    filings = db.relationship("Filing", back_populates="client_profile", cascade="all, delete-orphan")
+
+
+class Filing(db.Model):
+    __tablename__ = "filings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_profile_id = db.Column(db.Integer, db.ForeignKey("client_profiles.id"), nullable=False)
+    filing_type = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(50), nullable=False, default="draft")
+    due_date = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    client_profile = db.relationship("ClientProfile", back_populates="filings")
+    documents = db.relationship("Document", back_populates="filing", cascade="all, delete-orphan")
+
+
+class Document(db.Model):
+    __tablename__ = "documents"
+
+    id = db.Column(db.Integer, primary_key=True)
+    filing_id = db.Column(db.Integer, db.ForeignKey("filings.id"), nullable=False)
+    original_filename = db.Column(db.String(255), nullable=False)
+    storage_path = db.Column(db.String(512), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    filing = db.relationship("Filing", back_populates="documents")
+
+
+class ContactSubmission(db.Model):
+    __tablename__ = "contact_submissions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(255), nullable=False, index=True)
+    phone = db.Column(db.String(32), nullable=True)
+    message = db.Column(db.Text, nullable=False)
+    source = db.Column(db.String(50), nullable=False, default="website_contact_form")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class ConsultationBooking(db.Model):
+    __tablename__ = "consultation_bookings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(255), nullable=False, index=True)
+    phone = db.Column(db.String(32), nullable=False)
+    service_interest = db.Column(db.String(120), nullable=False)
+    preferred_date = db.Column(db.Date, nullable=False)
+    preferred_time = db.Column(db.Time, nullable=False)
+    notes = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(50), nullable=False, default="pending_confirmation")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class NewsletterSubscriber(db.Model):
+    __tablename__ = "newsletter_subscribers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    is_trusted = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

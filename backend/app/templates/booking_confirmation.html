@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Confirmed | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Consultation Request Received</h1>
+    <p>Thank you, {{ booking.full_name }}. We will confirm your slot shortly.</p>
+
+    <div class="summary-card">
+        <p><strong>Reference:</strong> BK-{{ '%06d'|format(booking.id) }}</p>
+        <p><strong>Service:</strong> {{ booking.service_interest }}</p>
+        <p><strong>Date:</strong> {{ booking.preferred_date.strftime('%d %b %Y') }}</p>
+        <p><strong>Time:</strong> {{ booking.preferred_time.strftime('%H:%M') }}</p>
+        <p><strong>Contact:</strong> {{ booking.email }} | {{ booking.phone }}</p>
+    </div>
+
+    <a class="button" href="{{ url_for('public.home') }}">Back to Home</a>
+</section>
+{% endblock %}

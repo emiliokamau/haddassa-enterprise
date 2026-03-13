@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}My Filings | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>My Filings</h1>
+
+    {% if filings %}
+    <div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Filing Type</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Documents</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for f in filings %}
+        <tr>
+            <td>{{ f.filing_type }}</td>
+            <td><span class="status-badge status-{{ f.status }}">{{ f.status.replace('_', ' ').title() }}</span></td>
+            <td>{% if f.due_date %}{{ f.due_date.strftime('%d %b %Y') }}{% else %}—{% endif %}</td>
+            <td>{{ f.documents|length }}</td>
+            <td><a href="{{ url_for('client.filing_detail', filing_id=f.id) }}" class="button button-outline">View</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="muted">No filings found on your account.</p>
+    {% endif %}
+
+    <div class="section-gap">
+        <a href="{{ url_for('client.dashboard') }}">&larr; Back to Dashboard</a>
+    </div>
+</section>
+{% endblock %}

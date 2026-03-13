@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Message Received | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Message Received</h1>
+    <p>Thank you, {{ submission.name }}. Our team has received your message.</p>
+    <p>You can also continue the conversation directly using one of the channels below.</p>
+
+    <div class="hero-actions">
+        {% if whatsapp_url %}
+            <a class="button" href="{{ whatsapp_url }}" target="_blank" rel="noopener">Continue on WhatsApp</a>
+        {% endif %}
+        <a class="button button-outline" href="{{ mailto_url }}">Send Email</a>
+    </div>
+
+    <p class="muted section-gap">
+        Preferred support email: <strong>{{ support_email }}</strong>
+    </p>
+</section>
+{% endblock %}

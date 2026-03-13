@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}File Too Large | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>File Too Large</h1>
+    <p class="muted">The uploaded file exceeds the size limit. Please upload a smaller file and try again.</p>
+    <a class="button" href="{{ url_for('client.dashboard') }}">Back to Dashboard</a>
+</section>
+{% endblock %}

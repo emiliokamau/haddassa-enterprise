@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Filings | Admin | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Filings</h1>
+
+    <nav class="filter-tabs section-gap">
+        <a href="{{ url_for('admin.filings') }}"
+           class="tab{% if not current_status %} tab-active{% endif %}">All</a>
+        {% for s in statuses %}
+        <a href="{{ url_for('admin.filings', status=s) }}"
+           class="tab{% if current_status == s %} tab-active{% endif %}">
+            {{ s.replace('_', ' ').title() }}
+        </a>
+        {% endfor %}
+    </nav>
+
+    {% if filings %}
+    <div class="table-wrap section-gap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Client</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Docs</th>
+                <th>Update Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for f in filings %}
+        <tr>
+            <td>{{ f.client_profile.company_name }}</td>
+            <td>{{ f.filing_type }}</td>
+            <td><span class="status-badge status-{{ f.status }}">{{ f.status.replace('_', ' ').title() }}</span></td>
+            <td>{% if f.due_date %}{{ f.due_date.strftime('%d %b %Y') }}{% else %}—{% endif %}</td>
+            <td>{{ f.documents|length }}</td>
+            <td>
+                <form method="post"
+                      action="{{ url_for('admin.update_filing_status', filing_id=f.id) }}"
+                      class="inline-status-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="status" class="status-select">
+                        {% for s in statuses %}
+                        <option value="{{ s }}"{% if f.status == s %} selected{% endif %}>
+                            {{ s.replace('_', ' ').title() }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="button">Save</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="muted section-gap">No filings found{% if current_status %} with status "{{ current_status.replace('_', ' ') }}"{% endif %}.</p>
+    {% endif %}
+</section>
+{% endblock %}

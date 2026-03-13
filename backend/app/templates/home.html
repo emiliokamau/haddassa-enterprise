@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Hadassah Enterprises{% endblock %}
+{% block meta_description %}Tax consulting and accountancy support for Kenyan businesses and individuals.{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Tax Compliance and Accountancy Support You Can Trust</h1>
+    <p>
+        Hadassah Enterprises, led by Esther Kamau (CPA-K), helps businesses and individuals
+        stay compliant with accurate books, timely tax filings, and guided advisory support.
+    </p>
+    <div class="hero-actions">
+        <a class="button" href="{{ url_for('public.services') }}">View Services</a>
+        <a class="button button-outline" href="{{ url_for('public.book_consultation') }}">Book Consultation</a>
+    </div>
+</section>
+
+<section class="content-panel section-gap">
+    <h2>Core Services</h2>
+    <div class="feature-grid">
+        <article>
+            <h3>Audit</h3>
+            <p>Independent financial reviews for better compliance confidence.</p>
+        </article>
+        <article>
+            <h3>Bookkeeping</h3>
+            <p>Reliable transaction records and monthly accounting discipline.</p>
+        </article>
+        <article>
+            <h3>Tax Services</h3>
+            <p>Preparation and filing support for monthly and annual obligations.</p>
+        </article>
+        <article>
+            <h3>Business Registration</h3>
+            <p>Company and business name registration support from start to finish.</p>
+        </article>
+    </div>
+</section>
+{% endblock %}

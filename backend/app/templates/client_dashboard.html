@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Client Dashboard | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Client Dashboard</h1>
+
+    {% if not profile %}
+    <div class="summary-card">
+        <p>Your client profile is not yet set up. Please <a href="{{ url_for('public.contact') }}">contact us</a> to complete your onboarding.</p>
+    </div>
+    {% else %}
+    <p class="muted">{{ profile.company_name }}</p>
+
+    <div class="kpi-grid section-gap">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ filings|length }}</div>
+            <div class="kpi-label">Total Filings</div>
+        </div>
+        <div class="kpi-card kpi-pending">
+            <div class="kpi-value">{{ pending_count }}</div>
+            <div class="kpi-label">In Progress</div>
+        </div>
+        <div class="kpi-card kpi-danger">
+            <div class="kpi-value">{{ overdue_count }}</div>
+            <div class="kpi-label">Overdue</div>
+        </div>
+    </div>
+
+    {% if recent_filings %}
+    <div class="section-gap">
+        <h2>Recent Filings</h2>
+        <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th>Docs</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in recent_filings %}
+            <tr>
+                <td><a href="{{ url_for('client.filing_detail', filing_id=f.id) }}">{{ f.filing_type }}</a></td>
+                <td><span class="status-badge status-{{ f.status }}">{{ f.status.replace('_', ' ').title() }}</span></td>
+                <td>{% if f.due_date %}{{ f.due_date.strftime('%d %b %Y') }}{% else %}—{% endif %}</td>
+                <td>{{ f.documents|length }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% if filings|length > 5 %}
+        <a href="{{ url_for('client.filings') }}" class="button button-outline section-gap">View All Filings</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p class="muted section-gap">No filings on your account yet. Your accountant will create filings for you.</p>
+    {% endif %}
+
+    <div class="section-gap">
+        <a href="{{ url_for('public.book_consultation') }}" class="button button-outline">Book a Consultation</a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+

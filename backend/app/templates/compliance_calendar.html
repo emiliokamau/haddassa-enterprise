@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Compliance Calendar | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Compliance Calendar</h1>
+    <p>Use this summary as a planning aid for monthly and annual filing responsibilities.</p>
+
+    <h2>Monthly Returns</h2>
+    <ul class="service-list">
+        <li>MRI</li>
+        <li>VAT</li>
+        <li>PAYE</li>
+        <li>TOT</li>
+        <li>Catering Levy</li>
+        <li>NSSF</li>
+        <li>SHA</li>
+    </ul>
+
+    <h2 class="section-gap">Annual Returns</h2>
+    <ul class="service-list">
+        <li>Individual Returns</li>
+        <li>Company Returns</li>
+        <li>Withholding Returns</li>
+    </ul>
+
+    <a class="button section-gap" href="{{ url_for('public.book_consultation') }}">Plan a Filing Consultation</a>
+</section>
+{% endblock %}

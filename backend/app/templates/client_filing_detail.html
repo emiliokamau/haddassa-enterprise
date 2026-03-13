@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ filing.filing_type }} | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <p><a href="{{ url_for('client.filings') }}">&larr; All Filings</a></p>
+
+    <h1>{{ filing.filing_type }}</h1>
+
+    <div class="summary-card">
+        <dl class="meta-list">
+            <dt>Status</dt>
+            <dd><span class="status-badge status-{{ filing.status }}">{{ filing.status.replace('_', ' ').title() }}</span></dd>
+            <dt>Due Date</dt>
+            <dd>{% if filing.due_date %}{{ filing.due_date.strftime('%d %b %Y') }}{% else %}Not set{% endif %}</dd>
+            <dt>Created</dt>
+            <dd>{{ filing.created_at.strftime('%d %b %Y') }}</dd>
+        </dl>
+    </div>
+
+    <div class="section-gap">
+        <h2>Documents</h2>
+        {% if filing.documents %}
+        <ul class="doc-list">
+            {% for doc in filing.documents %}
+            <li class="doc-item">
+                <span class="doc-name">{{ doc.original_filename }}</span>
+                <span class="muted doc-date">{{ doc.uploaded_at.strftime('%d %b %Y') }}</span>
+                <a href="{{ url_for('client.download_document', doc_id=doc.id) }}" class="button button-outline">Download</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">No documents uploaded yet.</p>
+        {% endif %}
+    </div>
+
+    {% if filing.status not in ('completed', 'cancelled') %}
+    <div class="section-gap">
+        <h2>Upload Document</h2>
+        <form method="post"
+              action="{{ url_for('client.upload_document', filing_id=filing.id) }}"
+              enctype="multipart/form-data"
+              class="upload-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="upload-area" id="upload-area">
+                <p>Drag &amp; drop a file here, or click to select</p>
+                <input type="file"
+                       name="document"
+                       id="document-input"
+                       accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png"
+                       required>
+                <p class="muted">Allowed: PDF, Word, Excel, CSV, JPEG, PNG &mdash; max 10 MB</p>
+            </div>
+            <button type="submit" class="button section-gap">Upload</button>
+        </form>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

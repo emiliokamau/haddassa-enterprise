@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Admin Dashboard</h1>
+
+    <div class="kpi-grid section-gap">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ total_clients }}</div>
+            <div class="kpi-label">Total Clients</div>
+        </div>
+        <div class="kpi-card kpi-pending">
+            <div class="kpi-value">{{ pending_filings }}</div>
+            <div class="kpi-label">Pending Filings</div>
+        </div>
+        <div class="kpi-card kpi-warning">
+            <div class="kpi-value">{{ upcoming_filings }}</div>
+            <div class="kpi-label">Due This Week</div>
+        </div>
+        <div class="kpi-card kpi-danger">
+            <div class="kpi-value">{{ overdue_filings }}</div>
+            <div class="kpi-label">Overdue</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ pending_bookings }}</div>
+            <div class="kpi-label">Pending Bookings</div>
+        </div>
+    </div>
+
+    <nav class="admin-quicklinks section-gap">
+        <a href="{{ url_for('admin.clients') }}" class="button button-outline">Manage Clients</a>
+        <a href="{{ url_for('admin.filings') }}" class="button button-outline">Manage Filings</a>
+        <a href="{{ url_for('admin.bookings') }}" class="button button-outline">View Bookings</a>
+    </nav>
+</section>
+{% endblock %}
+
