@@ -281,7 +281,8 @@ body.no-scroll {
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 1rem;
-    background: #fcfdff;
+    background: var(--surface);
+    color: var(--text);
 }
 
 .service-list {
@@ -303,6 +304,8 @@ body.no-scroll {
     border-radius: 8px;
     padding: 0.7rem;
     font: inherit;
+    background: var(--surface);
+    color: var(--text);
 }
 
 .contact-form input:focus,
@@ -318,7 +321,8 @@ body.no-scroll {
     border-radius: 8px;
     padding: 0.7rem;
     font: inherit;
-    background: #fff;
+    background: var(--surface);
+    color: var(--text);
 }
 
 .form-row {
@@ -337,8 +341,35 @@ body.no-scroll {
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 1rem;
-    background: #fcfdff;
+    background: var(--surface);
     margin: 1rem 0;
+}
+
+body[data-theme="dark"] .feature-grid article,
+body[data-theme="dark"] .summary-card {
+    background: #16233b;
+    border-color: #2f466b;
+}
+
+body[data-theme="dark"] .content-panel input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+body[data-theme="dark"] .content-panel textarea,
+body[data-theme="dark"] .content-panel select,
+body[data-theme="dark"] .hero input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+body[data-theme="dark"] .hero textarea,
+body[data-theme="dark"] .hero select,
+body[data-theme="dark"] .search-input,
+body[data-theme="dark"] .status-select {
+    background: #16233b;
+    color: #f3f7ff;
+    border-color: #375279;
+}
+
+body[data-theme="dark"] .content-panel input::placeholder,
+body[data-theme="dark"] .content-panel textarea::placeholder,
+body[data-theme="dark"] .hero input::placeholder,
+body[data-theme="dark"] .hero textarea::placeholder,
+body[data-theme="dark"] .search-input::placeholder {
+    color: #9db0cd;
 }
 
 .muted {
