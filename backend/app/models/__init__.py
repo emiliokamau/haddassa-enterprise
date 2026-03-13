@@ -146,3 +146,18 @@ class NewsletterSubscriber(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     is_trusted = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+
+class SiteUpdate(db.Model):
+    __tablename__ = "site_updates"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    broadcast_requested = db.Column(db.Boolean, nullable=False, default=False)
+    broadcast_success_count = db.Column(db.Integer, nullable=False, default=0)
+    broadcast_failure_count = db.Column(db.Integer, nullable=False, default=0)
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    created_by = db.relationship("User", backref=db.backref("site_updates", lazy="dynamic"))

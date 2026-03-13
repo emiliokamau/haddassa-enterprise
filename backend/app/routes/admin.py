@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 
-from ..models import ClientProfile, ConsultationBooking, Filing, User, db
+from ..models import ClientProfile, ConsultationBooking, Filing, NewsletterSubscriber, SiteUpdate, User, db
 from ..services.audit import log_action
 from ..services.authz import role_required
+from ..services.email import send_email
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -114,12 +115,88 @@ def bookings():
     query = ConsultationBooking.query
     if status_filter and status_filter in BOOKING_STATUSES:
         query = query.filter(ConsultationBooking.status == status_filter)
-    all_bookings = query.order_by(ConsultationBooking.preferred_date.asc()).all()
+    all_bookings = query.order_by(
+        ConsultationBooking.preferred_date.asc(),
+        ConsultationBooking.preferred_time.asc(),
+    ).all()
     return render_template(
         "admin_bookings.html",
         bookings=all_bookings,
         statuses=BOOKING_STATUSES,
         current_status=status_filter,
+    )
+
+
+@admin_bp.route("/updates", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def updates():
+    if request.method == "POST":
+        title = (request.form.get("title") or "").strip()
+        message = (request.form.get("message") or "").strip()
+        broadcast_requested = request.form.get("broadcast_subscribers") == "yes"
+
+        if not title or not message:
+            flash("Title and update message are required.", "error")
+            return redirect(url_for("admin.updates"))
+
+        update = SiteUpdate(
+            title=title,
+            message=message,
+            broadcast_requested=broadcast_requested,
+            created_by_user_id=current_user.id,
+        )
+        db.session.add(update)
+
+        success_count = 0
+        failure_count = 0
+        if broadcast_requested:
+            subscribers = NewsletterSubscriber.query.order_by(NewsletterSubscriber.id.asc()).all()
+            for subscriber in subscribers:
+                sent = send_email(
+                    to_email=subscriber.email,
+                    subject=f"Hadassah Site Update: {title}",
+                    text_body=(
+                        f"Hello {subscriber.full_name},\n\n"
+                        f"{message}\n\n"
+                        "Thank you for trusting Hadassah Enterprises."
+                    ),
+                )
+                if sent:
+                    success_count += 1
+                else:
+                    failure_count += 1
+
+        update.broadcast_success_count = success_count
+        update.broadcast_failure_count = failure_count
+
+        log_action(
+            "site_update_create",
+            entity_type="site_update",
+            details={
+                "title": title,
+                "broadcast_requested": broadcast_requested,
+                "success_count": success_count,
+                "failure_count": failure_count,
+            },
+        )
+        db.session.commit()
+
+        if broadcast_requested:
+            flash(
+                f"Update posted. Broadcast sent to {success_count} subscriber(s), {failure_count} failed.",
+                "success",
+            )
+        else:
+            flash("Update posted successfully.", "success")
+        return redirect(url_for("admin.updates"))
+
+    updates_list = SiteUpdate.query.order_by(SiteUpdate.created_at.desc()).all()
+    subscriber_count = NewsletterSubscriber.query.count()
+    return render_template(
+        "admin_updates.html",
+        updates=updates_list,
+        subscriber_count=subscriber_count,
     )
 
 

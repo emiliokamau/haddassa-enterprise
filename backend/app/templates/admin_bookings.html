@@ -22,11 +22,12 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>Name</th>
+                <th>Client Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Service</th>
+                <th>Service Needed</th>
                 <th>Date &amp; Time</th>
+                <th>Notes</th>
                 <th>Status</th>
                 <th>Update</th>
             </tr>
@@ -38,7 +39,8 @@
             <td>{{ b.email }}</td>
             <td>{{ b.phone }}</td>
             <td>{{ b.service_interest }}</td>
-            <td>{{ b.preferred_date.strftime('%d %b %Y') }} {{ b.preferred_time.strftime('%H:%M') }}</td>
+            <td>{{ b.preferred_date.strftime('%d %b %Y') }} {{ b.preferred_time.strftime('%I:%M %p') }}</td>
+            <td>{{ b.notes or '—' }}</td>
             <td><span class="status-badge status-{{ b.status }}">{{ b.status.replace('_', ' ').title() }}</span></td>
             <td>
                 <form method="post"

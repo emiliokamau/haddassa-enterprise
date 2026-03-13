@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Site Updates | Admin | Hadassah Enterprises{% endblock %}
+
+{% block content %}
+<section class="content-panel">
+    <h1>Site Updates &amp; Reminders</h1>
+    <p class="muted">Create announcements for your records and optionally broadcast them to {{ subscriber_count }} trusted subscriber(s).</p>
+
+    <form method="post" action="{{ url_for('admin.updates') }}" class="section-gap">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="update-title">Title</label>
+        <input id="update-title" name="title" type="text" maxlength="200" required>
+
+        <label for="update-message">Update / Reminder Message</label>
+        <textarea id="update-message" name="message" rows="6" maxlength="5000" required></textarea>
+
+        <label class="trusted-checkbox">
+            <input type="checkbox" name="broadcast_subscribers" value="yes">
+            Email this update to all subscribed trusted clients.
+        </label>
+
+        <button type="submit" class="button">Publish Update</button>
+    </form>
+
+    {% if updates %}
+    <div class="table-wrap section-gap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Created</th>
+                <th>Title</th>
+                <th>Message</th>
+                <th>Broadcast</th>
+                <th>By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in updates %}
+            <tr>
+                <td>{{ item.created_at.strftime('%d %b %Y %H:%M') }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.message }}</td>
+                <td>
+                    {% if item.broadcast_requested %}
+                        Sent {{ item.broadcast_success_count }} / Failed {{ item.broadcast_failure_count }}
+                    {% else %}
+                        Not sent
+                    {% endif %}
+                </td>
+                <td>{{ item.created_by.email if item.created_by else 'System' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="muted section-gap">No updates have been posted yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

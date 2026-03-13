@@ -58,6 +58,7 @@ def create_app(config_object=None):
             Document,
             Filing,
             NewsletterSubscriber,
+            SiteUpdate,
             User,
         )
 
@@ -71,6 +72,7 @@ def create_app(config_object=None):
             "ContactSubmission": ContactSubmission,
             "ConsultationBooking": ConsultationBooking,
             "NewsletterSubscriber": NewsletterSubscriber,
+            "SiteUpdate": SiteUpdate,
         }
 
     @app.route("/health")
