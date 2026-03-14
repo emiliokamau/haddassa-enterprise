@@ -151,6 +151,19 @@ def _clear_pending_2fa_session():
     session.pop("pending_2fa_sms_expires", None)
 
 
+def _sync_admin_role_if_configured(user):
+    admin_email = (current_app.config.get("ADMIN_EMAIL") or "").strip().lower()
+    if not admin_email:
+        return
+
+    if user.email == admin_email and user.role != "admin":
+        user.role = "admin"
+        db.session.commit()
+        current_app.logger.warning(
+            "Synchronized role to admin for configured ADMIN_EMAIL user_id=%s", user.id
+        )
+
+
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -218,6 +231,8 @@ def login():
             flash("Please confirm your email before signing in.", "error")
             return redirect(url_for("auth.resend_confirmation"))
 
+        _sync_admin_role_if_configured(user)
+
         if user.two_factor_enabled and user.two_factor_secret:
             session["pending_2fa_user_id"] = user.id
             sms_sent = _send_sms_otp_for_pending_login(user)
@@ -252,6 +267,8 @@ def login_two_factor():
         _clear_pending_2fa_session()
         flash("Unable to complete 2FA verification. Please sign in again.", "error")
         return redirect(url_for("auth.login"))
+
+    _sync_admin_role_if_configured(user)
 
     form = TwoFactorVerifyForm()
     if form.validate_on_submit():
@@ -443,3 +460,6 @@ def reset_password(token):
         return redirect(url_for("auth.login"))
 
     return render_template("auth_reset_password.html", form=form)
+
+
+

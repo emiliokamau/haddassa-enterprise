@@ -206,3 +206,48 @@ def test_authenticated_user_sees_2fa_security_link(app, client):
     response = client.get("/", follow_redirects=True)
     assert response.status_code == 200
     assert b"/auth/2fa/setup" in response.data
+
+def test_configured_admin_email_is_promoted_on_login(app, client):
+    with app.app_context():
+        app.config["ADMIN_EMAIL"] = "promote-admin@example.com"
+        create_user("promote-admin@example.com", "pass12345", role="client")
+
+    response = client.post(
+        "/auth/login",
+        data={"email": "promote-admin@example.com", "password": "pass12345"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code in (301, 302)
+    assert "/admin/dashboard" in response.location
+
+    with app.app_context():
+        user = User.query.filter_by(email="promote-admin@example.com").first()
+        assert user is not None
+        assert user.role == "admin"
+
+
+def test_configured_admin_email_is_promoted_on_2fa_login(app, client, monkeypatch):
+    with app.app_context():
+        app.config["ADMIN_EMAIL"] = "promote-2fa@example.com"
+        user = create_2fa_user("promote-2fa@example.com", "pass12345", role="client")
+        user_id = user.id
+
+    with client.session_transaction() as sess:
+        sess["pending_2fa_user_id"] = user_id
+
+    monkeypatch.setattr(auth_routes, "_verify_pending_sms_otp", lambda _code: True)
+
+    response = client.post(
+        "/auth/2fa",
+        data={"otp_code": "123456"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code in (301, 302)
+    assert "/admin/dashboard" in response.location
+
+    with app.app_context():
+        user = User.query.filter_by(email="promote-2fa@example.com").first()
+        assert user is not None
+        assert user.role == "admin"
