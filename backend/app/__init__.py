@@ -1,3 +1,4 @@
+import click
 from flask import Flask, jsonify, render_template
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -48,6 +49,27 @@ def create_app(config_object=None):
         db.create_all()
         print("Database initialized.")
 
+    @app.cli.command("process-update-broadcasts")
+    @click.option("--batch-size", default=100, show_default=True, type=int)
+    @click.option("--retry-failed", is_flag=True, default=False)
+    @click.option("--enqueue-scheduled", is_flag=True, default=False)
+    def process_update_broadcasts_command(batch_size, retry_failed, enqueue_scheduled):
+        """Process queued site update broadcasts."""
+        from .services.broadcasts import enqueue_due_scheduled_updates, process_site_update_queue
+
+        if enqueue_scheduled:
+            enqueue_result = enqueue_due_scheduled_updates()
+            print(
+                "Scheduled reminders queued: "
+                f"updates={enqueue_result['updates_queued']} deliveries={enqueue_result['deliveries_queued']}"
+            )
+
+        result = process_site_update_queue(batch_size=batch_size, retry_failed=retry_failed)
+        print(
+            "Processed site update queue: "
+            f"processed={result['processed']} sent={result['sent']} failed={result['failed']}"
+        )
+
     @app.shell_context_processor
     def shell_context():
         from .models import (
@@ -59,6 +81,7 @@ def create_app(config_object=None):
             Filing,
             NewsletterSubscriber,
             SiteUpdate,
+            SiteUpdateDelivery,
             User,
         )
 
@@ -73,6 +96,7 @@ def create_app(config_object=None):
             "ConsultationBooking": ConsultationBooking,
             "NewsletterSubscriber": NewsletterSubscriber,
             "SiteUpdate": SiteUpdate,
+            "SiteUpdateDelivery": SiteUpdateDelivery,
         }
 
     @app.route("/health")

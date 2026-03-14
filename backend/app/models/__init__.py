@@ -144,6 +144,7 @@ class NewsletterSubscriber(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    phone = db.Column(db.String(32), nullable=True)
     is_trusted = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -155,9 +156,42 @@ class SiteUpdate(db.Model):
     title = db.Column(db.String(200), nullable=False)
     message = db.Column(db.Text, nullable=False)
     broadcast_requested = db.Column(db.Boolean, nullable=False, default=False)
+    send_email = db.Column(db.Boolean, nullable=False, default=True)
+    send_sms = db.Column(db.Boolean, nullable=False, default=False)
+    send_whatsapp = db.Column(db.Boolean, nullable=False, default=False)
+    schedule_type = db.Column(db.String(20), nullable=False, default="immediate")
+    schedule_day = db.Column(db.Integer, nullable=True)
+    schedule_month = db.Column(db.Integer, nullable=True)
+    last_scheduled_run_on = db.Column(db.Date, nullable=True)
+    broadcast_pending_count = db.Column(db.Integer, nullable=False, default=0)
     broadcast_success_count = db.Column(db.Integer, nullable=False, default=0)
     broadcast_failure_count = db.Column(db.Integer, nullable=False, default=0)
     created_by_user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     created_by = db.relationship("User", backref=db.backref("site_updates", lazy="dynamic"))
+
+
+class SiteUpdateDelivery(db.Model):
+    __tablename__ = "site_update_deliveries"
+
+    id = db.Column(db.Integer, primary_key=True)
+    site_update_id = db.Column(db.Integer, db.ForeignKey("site_updates.id"), nullable=False, index=True)
+    subscriber_id = db.Column(db.Integer, db.ForeignKey("newsletter_subscribers.id"), nullable=True)
+    recipient_name = db.Column(db.String(100), nullable=False)
+    recipient_email = db.Column(db.String(255), nullable=True, index=True)
+    recipient_phone = db.Column(db.String(32), nullable=True, index=True)
+    channel = db.Column(db.String(20), nullable=False, default="email", index=True)
+    dispatch_key = db.Column(db.String(20), nullable=False, default="manual", index=True)
+    status = db.Column(db.String(20), nullable=False, default="pending", index=True)
+    attempt_count = db.Column(db.Integer, nullable=False, default=0)
+    last_error = db.Column(db.Text, nullable=True)
+    sent_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    site_update = db.relationship(
+        "SiteUpdate",
+        backref=db.backref("deliveries", lazy="dynamic", cascade="all, delete-orphan"),
+    )
+    subscriber = db.relationship("NewsletterSubscriber", backref=db.backref("site_update_deliveries", lazy="dynamic"))

@@ -2,6 +2,7 @@ from datetime import date
 from urllib.parse import quote_plus
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import DateField, SelectField, StringField, SubmitField, TextAreaField, TimeField
 from wtforms.validators import DataRequired, Email, Length, Optional, Regexp, ValidationError
@@ -166,6 +167,10 @@ def contact():
 
 @public_bp.route("/book-consultation", methods=["GET", "POST"])
 def book_consultation():
+    if current_user.is_authenticated and current_user.role == "admin":
+        flash("Admin accounts cannot book consultation sessions.", "error")
+        return redirect(url_for("admin.dashboard"))
+
     form = ConsultationBookingForm()
     if form.validate_on_submit():
         booking = ConsultationBooking(
@@ -208,6 +213,7 @@ def booking_confirmation(booking_id):
 def subscribe_newsletter():
     full_name = (request.form.get("full_name") or "").strip()
     email = (request.form.get("email") or "").strip().lower()
+    phone = (request.form.get("phone") or "").strip() or None
     trusted_confirm = request.form.get("trusted_confirm") == "yes"
 
     if not full_name or not email:
@@ -226,6 +232,7 @@ def subscribe_newsletter():
     subscriber = NewsletterSubscriber(
         full_name=full_name,
         email=email,
+        phone=phone,
         is_trusted=True,
     )
     db.session.add(subscriber)

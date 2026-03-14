@@ -18,11 +18,52 @@
 
         <label class="trusted-checkbox">
             <input type="checkbox" name="broadcast_subscribers" value="yes">
-            Email this update to all subscribed trusted clients.
+            Broadcast this update to subscribers.
         </label>
+
+        <p class="muted">Delivery Channels</p>
+        <label class="trusted-checkbox">
+            <input type="checkbox" name="channel_email" value="yes" checked>
+            Email
+        </label>
+        <label class="trusted-checkbox">
+            <input type="checkbox" name="channel_sms" value="yes">
+            SMS
+        </label>
+        <label class="trusted-checkbox">
+            <input type="checkbox" name="channel_whatsapp" value="yes">
+            WhatsApp
+        </label>
+
+        <label for="schedule-type">Schedule</label>
+        <select id="schedule-type" name="schedule_type">
+            <option value="immediate">Immediate</option>
+            <option value="monthly">Monthly (specific day)</option>
+            <option value="yearly">Yearly (specific date)</option>
+        </select>
+
+        <label for="schedule-day">Schedule Day (1-31)</label>
+        <input id="schedule-day" name="schedule_day" type="number" min="1" max="31" placeholder="e.g. 20">
+
+        <label for="schedule-month">Schedule Month (1-12, yearly only)</label>
+        <input id="schedule-month" name="schedule_month" type="number" min="1" max="12" placeholder="e.g. 3 for March">
 
         <button type="submit" class="button">Publish Update</button>
     </form>
+
+    <form method="get" action="{{ url_for('admin.updates') }}" class="search-form section-gap">
+        <input type="date" name="date_from" value="{{ date_from }}" class="search-input" aria-label="Filter start date">
+        <input type="date" name="date_to" value="{{ date_to }}" class="search-input" aria-label="Filter end date">
+        <select name="broadcast_filter" class="status-select" aria-label="Filter broadcast status">
+            <option value="all"{% if broadcast_filter == 'all' %} selected{% endif %}>All</option>
+            <option value="broadcasted"{% if broadcast_filter == 'broadcasted' %} selected{% endif %}>Broadcasted</option>
+            <option value="not_broadcasted"{% if broadcast_filter == 'not_broadcasted' %} selected{% endif %}>Not Broadcasted</option>
+        </select>
+        <button type="submit" class="button">Apply Filters</button>
+        <a href="{{ url_for('admin.updates') }}" class="button button-outline">Reset</a>
+    </form>
+
+    <p class="muted">Showing {{ updates|length }} of {{ total_updates }} update(s).</p>
 
     {% if updates %}
     <div class="table-wrap section-gap">
@@ -32,7 +73,10 @@
                 <th>Created</th>
                 <th>Title</th>
                 <th>Message</th>
+                <th>Channels</th>
+                <th>Schedule</th>
                 <th>Broadcast</th>
+                <th>Actions</th>
                 <th>By</th>
             </tr>
         </thead>
@@ -43,10 +87,37 @@
                 <td>{{ item.title }}</td>
                 <td>{{ item.message }}</td>
                 <td>
+                    {% set channels = [] %}
+                    {% if item.send_email %}{% set _ = channels.append('Email') %}{% endif %}
+                    {% if item.send_sms %}{% set _ = channels.append('SMS') %}{% endif %}
+                    {% if item.send_whatsapp %}{% set _ = channels.append('WhatsApp') %}{% endif %}
+                    {{ channels|join(', ') if channels else 'None' }}
+                </td>
+                <td>
+                    {% if item.schedule_type == 'monthly' %}
+                        Monthly on day {{ item.schedule_day }}
+                    {% elif item.schedule_type == 'yearly' %}
+                        Yearly on {{ item.schedule_day }}/{{ item.schedule_month }}
+                    {% else %}
+                        Immediate
+                    {% endif %}
+                </td>
+                <td>
                     {% if item.broadcast_requested %}
-                        Sent {{ item.broadcast_success_count }} / Failed {{ item.broadcast_failure_count }}
+                        Queued {{ item.broadcast_pending_count }} / Sent {{ item.broadcast_success_count }} / Failed {{ item.broadcast_failure_count }}
                     {% else %}
                         Not sent
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.broadcast_failure_count > 0 %}
+                    <form method="post" action="{{ url_for('admin.resend_failed_update_deliveries', update_id=item.id) }}" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="return_to" value="{{ request.full_path }}">
+                        <button type="submit" class="button button-outline">Resend Failed</button>
+                    </form>
+                    {% else %}
+                    <span class="muted">-</span>
                     {% endif %}
                 </td>
                 <td>{{ item.created_by.email if item.created_by else 'System' }}</td>
@@ -55,6 +126,20 @@
         </tbody>
     </table>
     </div>
+
+    <nav class="filter-tabs section-gap" aria-label="Updates pagination">
+        <a href="{{ url_for('admin.updates', page=1, date_from=date_from, date_to=date_to, broadcast_filter=broadcast_filter) }}"
+           class="tab{% if page == 1 %} tab-active{% endif %}">First</a>
+        {% if page > 1 %}
+        <a href="{{ url_for('admin.updates', page=page-1, date_from=date_from, date_to=date_to, broadcast_filter=broadcast_filter) }}" class="tab">Previous</a>
+        {% endif %}
+        <span class="tab tab-active">Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+        <a href="{{ url_for('admin.updates', page=page+1, date_from=date_from, date_to=date_to, broadcast_filter=broadcast_filter) }}" class="tab">Next</a>
+        {% endif %}
+        <a href="{{ url_for('admin.updates', page=total_pages, date_from=date_from, date_to=date_to, broadcast_filter=broadcast_filter) }}"
+           class="tab{% if page == total_pages %} tab-active{% endif %}">Last</a>
+    </nav>
     {% else %}
     <p class="muted section-gap">No updates have been posted yet.</p>
     {% endif %}
