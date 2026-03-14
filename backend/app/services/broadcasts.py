@@ -37,7 +37,12 @@ def enqueue_due_scheduled_updates(run_on: date | None = None) -> dict:
 
 
 def enqueue_site_update_broadcast(site_update: SiteUpdate, dispatch_key: str = "manual") -> int:
-    subscribers = NewsletterSubscriber.query.order_by(NewsletterSubscriber.id.asc()).all()
+    subscribers = (
+        NewsletterSubscriber.query
+        .filter(NewsletterSubscriber.is_trusted.is_(True))
+        .order_by(NewsletterSubscriber.id.asc())
+        .all()
+    )
     channels = _selected_channels(site_update)
     queued = 0
 
@@ -221,3 +226,5 @@ def _refresh_site_update_counts() -> None:
             site_update.broadcast_success_count = sent_count
             site_update.broadcast_failure_count = failed_count
             site_update.broadcast_pending_count = pending_count
+
+

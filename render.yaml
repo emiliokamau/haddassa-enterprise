@@ -51,3 +51,38 @@ services:
         value: whatsapp:+14155238886
       - key: TWILIO_WHATSAPP_BOOKING_CONTENT_SID
         sync: false
+
+  - type: cron
+    name: hadassah-broadcast-worker
+    env: python
+    rootDir: backend
+    schedule: "*/10 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: flask --app run.py process-update-broadcasts --enqueue-scheduled --batch-size 100
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: EMAIL_PROVIDER
+        value: sendgrid
+      - key: ENABLE_EMAIL_NOTIFICATIONS
+        value: true
+      - key: FROM_EMAIL
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        sync: false
+      - key: ENABLE_TWILIO_WHATSAPP
+        value: true
+      - key: TWILIO_WHATSAPP_FROM_NUMBER
+        value: whatsapp:+14155238886

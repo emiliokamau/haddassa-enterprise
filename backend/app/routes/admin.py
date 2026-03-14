@@ -272,6 +272,7 @@ def updates():
     )
 
     subscriber_count = NewsletterSubscriber.query.count()
+    pending_queue_updates = SiteUpdate.query.filter(SiteUpdate.broadcast_pending_count > 0).count()
     return render_template(
         "admin_updates.html",
         updates=updates_list,
@@ -282,6 +283,7 @@ def updates():
         date_from=date_from,
         date_to=date_to,
         broadcast_filter=broadcast_filter,
+        pending_queue_updates=pending_queue_updates,
     )
 
 
@@ -335,4 +337,5 @@ def update_booking_status(booking_id):
     db.session.commit()
     flash(f"Booking updated to '{new_status.replace('_', ' ')}'.", "success")
     return redirect(url_for("admin.bookings"))
+
 

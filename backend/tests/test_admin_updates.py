@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from app.models import (
     ConsultationBooking,
@@ -300,3 +300,72 @@ def test_resend_failed_deliveries_action(app, client):
         refreshed_update = db.session.get(SiteUpdate, update_id)
         assert refreshed_update.broadcast_pending_count == 1
         assert refreshed_update.broadcast_failure_count == 0
+
+def test_broadcast_enqueues_trusted_subscribers_only(app, client):
+    with app.app_context():
+        create_user("admin-trusted@example.com", "pass12345", role="admin")
+        db.session.add(
+            NewsletterSubscriber(full_name="Trusted", email="trusted@example.com", is_trusted=True)
+        )
+        db.session.add(
+            NewsletterSubscriber(full_name="Untrusted", email="untrusted@example.com", is_trusted=False)
+        )
+        db.session.commit()
+
+    login(client, "admin-trusted@example.com", "pass12345")
+
+    response = client.post(
+        "/admin/updates",
+        data={
+            "title": "Trusted Broadcast",
+            "message": "Trusted audience only.",
+            "broadcast_subscribers": "yes",
+            "channel_email": "yes",
+            "schedule_type": "immediate",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code in (301, 302)
+
+    with app.app_context():
+        update = SiteUpdate.query.filter_by(title="Trusted Broadcast").first()
+        assert update is not None
+        deliveries = SiteUpdateDelivery.query.filter_by(site_update_id=update.id).all()
+        assert len(deliveries) == 1
+        assert deliveries[0].recipient_email == "trusted@example.com"
+
+
+def test_updates_page_shows_global_pending_queue_warning(app, client):
+    with app.app_context():
+        create_user("admin-global-pending@example.com", "pass12345", role="admin")
+
+        # Create enough records to push the pending one beyond page 1
+        for i in range(12):
+            db.session.add(
+                SiteUpdate(
+                    title=f"Global {i}",
+                    message="Content",
+                    broadcast_requested=False,
+                    send_email=True,
+                    broadcast_pending_count=0,
+                )
+            )
+
+        db.session.add(
+            SiteUpdate(
+                title="Pending Off Page",
+                message="Pending queue item",
+                broadcast_requested=True,
+                send_email=True,
+                broadcast_pending_count=3,
+                created_at=datetime(2000, 1, 1),
+            )
+        )
+        db.session.commit()
+
+    login(client, "admin-global-pending@example.com", "pass12345")
+    first_page = client.get("/admin/updates?page=1")
+
+    assert first_page.status_code == 200
+    assert b"Broadcast Queue Pending" in first_page.data
+

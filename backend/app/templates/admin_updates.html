@@ -6,7 +6,6 @@
 <section class="content-panel">
     <h1>Site Updates &amp; Reminders</h1>
     <p class="muted">Create announcements for your records and optionally broadcast them to {{ subscriber_count }} trusted subscriber(s).</p>
-{% set pending_queue_updates = updates | selectattr('broadcast_pending_count', 'greaterthan', 0) | list | length %}
 {% if pending_queue_updates > 0 %}
 <div class="flash flash-error section-gap" role="alert">
     <strong>Broadcast Queue Pending:</strong>
@@ -153,4 +152,5 @@
     {% endif %}
 </section>
 {% endblock %}
+
 
