@@ -4,6 +4,7 @@ from urllib.parse import quote_plus
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_wtf import FlaskForm
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from wtforms import DateField, SelectField, StringField, SubmitField, TextAreaField, TimeField
 from wtforms.validators import DataRequired, Email, Length, Optional, Regexp, ValidationError
 
@@ -12,6 +13,29 @@ from ..services.email import send_email
 from ..services.whatsapp import send_whatsapp_template, send_whatsapp_text
 
 public_bp = Blueprint("public", __name__)
+
+
+def _booking_serializer() -> URLSafeTimedSerializer:
+    return URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+
+
+def _generate_booking_confirmation_token(booking_id: int) -> str:
+    return _booking_serializer().dumps({"booking_id": booking_id, "purpose": "booking_confirmation"})
+
+
+def _verify_booking_confirmation_token(token: str, max_age: int) -> int | None:
+    try:
+        payload = _booking_serializer().loads(token, max_age=max_age)
+    except (BadSignature, SignatureExpired):
+        return None
+
+    if payload.get("purpose") != "booking_confirmation":
+        return None
+
+    booking_id = payload.get("booking_id")
+    if not isinstance(booking_id, int) or booking_id <= 0:
+        return None
+    return booking_id
 
 
 class ContactForm(FlaskForm):
@@ -198,14 +222,25 @@ def book_consultation():
             ),
         )
         _send_booking_whatsapp_confirmation(booking)
-        return redirect(url_for("public.booking_confirmation", booking_id=booking.id))
+        confirmation_token = _generate_booking_confirmation_token(booking.id)
+        return redirect(url_for("public.booking_confirmation", token=confirmation_token))
 
     return render_template("book_consultation.html", form=form)
 
 
-@public_bp.route("/book-consultation/confirmation/<int:booking_id>")
-def booking_confirmation(booking_id):
-    booking = ConsultationBooking.query.get_or_404(booking_id)
+@public_bp.route("/book-consultation/confirmation/<token>")
+def booking_confirmation(token):
+    max_age = int(current_app.config.get("BOOKING_CONFIRMATION_TOKEN_MAX_AGE_SECONDS", 3600))
+    booking_id = _verify_booking_confirmation_token(token, max_age=max_age)
+    if booking_id is None:
+        flash("This booking confirmation link is invalid or expired.", "error")
+        return redirect(url_for("public.book_consultation"))
+
+    booking = db.session.get(ConsultationBooking, booking_id)
+    if booking is None:
+        flash("Unable to locate this booking confirmation.", "error")
+        return redirect(url_for("public.book_consultation"))
+
     return render_template("booking_confirmation.html", booking=booking)
 
 
@@ -253,3 +288,13 @@ def subscribe_newsletter():
 
     flash("Subscribed successfully. You will receive monthly filing and returns updates.", "success")
     return redirect(request.referrer or url_for("public.home"))
+
+
+
+
+
+
+
+
+
+

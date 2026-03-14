@@ -1,3 +1,21 @@
+# Implementation Status - Current
+
+## Phase F Security & Consistency Update (2026-03-14)
+
+### Completed
+- Secured booking confirmation flow with signed, expiring tokens (replacing enumerable integer IDs in URL).
+- Added config key `BOOKING_CONFIRMATION_TOKEN_MAX_AGE_SECONDS` (default 3600s).
+- Added regression test to verify booking confirmations require a valid signed token.
+- Implemented real drag-and-drop behavior for client document upload area in `main.js`.
+- Added admin updates queue warning banner when pending broadcast deliveries exist.
+- Removed duplicate conflicting `psycopg2-binary` pin in requirements.
+
+### Current Verified Test Result
+- `pytest tests/test_public_and_security.py -q` -> `5 passed`.
+- Full-suite verification pending after final phase consolidation.
+
+---
+
 # Implementation Status - Phase E (Baseline)
 
 ## Completed in this handoff (Phase D)
@@ -141,4 +159,5 @@ If migration has already been applied, skip `db init` and `db upgrade`.
 - Add structured logging and request correlation IDs.
 - Add production transport hardening (HSTS at reverse proxy / TLS termination layer).
 - Run UAT with real workflows and capture sign-off checklist.
+
 

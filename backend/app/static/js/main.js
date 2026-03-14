@@ -69,4 +69,68 @@ document.addEventListener("DOMContentLoaded", () => {
             link.addEventListener("click", () => setMobileDrawerState(false));
         });
     }
+    const uploadArea = document.getElementById("upload-area");
+    const fileInput = document.getElementById("document-input");
+
+    if (uploadArea && fileInput) {
+        const setSelectedFilename = (name) => {
+            let nameNode = uploadArea.querySelector(".upload-filename");
+            if (!nameNode) {
+                nameNode = document.createElement("p");
+                nameNode.className = "upload-filename";
+                uploadArea.appendChild(nameNode);
+            }
+            nameNode.textContent = name;
+        };
+
+        uploadArea.addEventListener("click", (event) => {
+            if (event.target !== fileInput) {
+                fileInput.click();
+            }
+        });
+
+        fileInput.addEventListener("change", () => {
+            if (fileInput.files && fileInput.files.length > 0) {
+                setSelectedFilename(fileInput.files[0].name);
+            }
+        });
+
+        ["dragenter", "dragover"].forEach((eventName) => {
+            uploadArea.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                uploadArea.classList.add("drag-over");
+            });
+        });
+
+        ["dragleave", "dragend"].forEach((eventName) => {
+            uploadArea.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                uploadArea.classList.remove("drag-over");
+            });
+        });
+
+        uploadArea.addEventListener("drop", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            uploadArea.classList.remove("drag-over");
+
+            const files = event.dataTransfer && event.dataTransfer.files;
+            if (!files || files.length === 0) {
+                return;
+            }
+
+            // Keep one-file upload behavior aligned with backend validation.
+            try {
+                const transfer = new DataTransfer();
+                transfer.items.add(files[0]);
+                fileInput.files = transfer.files;
+                fileInput.dispatchEvent(new Event("change"));
+            } catch (_error) {
+                setSelectedFilename(`${files[0].name} (selected)`);
+            }
+        });
+    }
 });
+

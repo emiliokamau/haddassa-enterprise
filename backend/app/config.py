@@ -71,6 +71,7 @@ class Config:
     EMAIL_CONFIRMATION_REQUIRED = os.getenv("EMAIL_CONFIRMATION_REQUIRED", "true").lower() == "true"
     EMAIL_TOKEN_MAX_AGE_SECONDS = int(os.getenv("EMAIL_TOKEN_MAX_AGE_SECONDS", "86400"))
     PASSWORD_RESET_TOKEN_MAX_AGE_SECONDS = int(os.getenv("PASSWORD_RESET_TOKEN_MAX_AGE_SECONDS", "3600"))
+    BOOKING_CONFIRMATION_TOKEN_MAX_AGE_SECONDS = int(os.getenv("BOOKING_CONFIRMATION_TOKEN_MAX_AGE_SECONDS", "3600"))
 
     # Optional Twilio SMS one-time code flow
     ENABLE_SMS_OTP = os.getenv("ENABLE_SMS_OTP", "false").lower() == "true"
@@ -102,3 +103,4 @@ config_by_name = {
 def get_config():
     environment = os.getenv("FLASK_ENV", "development").lower()
     return config_by_name.get(environment, DevelopmentConfig)
+

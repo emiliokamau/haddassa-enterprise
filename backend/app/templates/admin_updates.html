@@ -6,6 +6,14 @@
 <section class="content-panel">
     <h1>Site Updates &amp; Reminders</h1>
     <p class="muted">Create announcements for your records and optionally broadcast them to {{ subscriber_count }} trusted subscriber(s).</p>
+{% set pending_queue_updates = updates | selectattr('broadcast_pending_count', 'greaterthan', 0) | list | length %}
+{% if pending_queue_updates > 0 %}
+<div class="flash flash-error section-gap" role="alert">
+    <strong>Broadcast Queue Pending:</strong>
+    {{ pending_queue_updates }} update(s) still have queued deliveries. Ensure your worker/cron is running:
+    <code>flask --app run.py process-update-broadcasts --enqueue-scheduled</code>
+</div>
+{% endif %}
 
     <form method="post" action="{{ url_for('admin.updates') }}" class="section-gap">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -145,3 +153,4 @@
     {% endif %}
 </section>
 {% endblock %}
+
