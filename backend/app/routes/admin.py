@@ -14,7 +14,12 @@ from ..models import (
 )
 from ..services.audit import log_action
 from ..services.authz import role_required
-from ..services.broadcasts import enqueue_site_update_broadcast, requeue_failed_deliveries
+from ..services.broadcasts import (
+    enqueue_due_scheduled_updates,
+    enqueue_site_update_broadcast,
+    process_site_update_queue,
+    requeue_failed_deliveries,
+)
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -315,6 +320,40 @@ def resend_failed_update_deliveries(update_id):
     return redirect(url_for("admin.updates"))
 
 
+
+@admin_bp.route("/updates/process-queue", methods=["POST"])
+@login_required
+@role_required("admin")
+def process_updates_queue_now():
+    enqueue_result = enqueue_due_scheduled_updates()
+    result = process_site_update_queue(batch_size=200)
+
+    log_action(
+        "site_update_process_queue_manual",
+        entity_type="site_update",
+        details={
+            "updates_queued": enqueue_result["updates_queued"],
+            "deliveries_queued": enqueue_result["deliveries_queued"],
+            "processed": result["processed"],
+            "sent": result["sent"],
+            "failed": result["failed"],
+        },
+    )
+    db.session.commit()
+
+    flash(
+        "Queue processed: "
+        f"processed {result['processed']}, sent {result['sent']}, failed {result['failed']}. "
+        f"Scheduled enqueued: {enqueue_result['deliveries_queued']} delivery item(s).",
+        "success",
+    )
+
+    return_to = (request.form.get("return_to") or "").strip()
+    if return_to.startswith("/admin/updates"):
+        return redirect(return_to)
+    return redirect(url_for("admin.updates"))
+
+
 @admin_bp.route("/bookings/<int:booking_id>/status", methods=["POST"])
 @login_required
 @role_required("admin")
@@ -337,5 +376,9 @@ def update_booking_status(booking_id):
     db.session.commit()
     flash(f"Booking updated to '{new_status.replace('_', ' ')}'.", "success")
     return redirect(url_for("admin.bookings"))
+
+
+
+
 
 

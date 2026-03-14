@@ -369,3 +369,58 @@ def test_updates_page_shows_global_pending_queue_warning(app, client):
     assert first_page.status_code == 200
     assert b"Broadcast Queue Pending" in first_page.data
 
+
+def test_admin_can_process_queue_manually(app, client, monkeypatch):
+    with app.app_context():
+        create_user("admin-manual-queue@example.com", "pass12345", role="admin")
+        update = SiteUpdate(
+            title="Manual Queue",
+            message="Process without cron.",
+            broadcast_requested=True,
+            send_email=True,
+            created_by_user_id=User.query.filter_by(email="admin-manual-queue@example.com").first().id,
+            broadcast_pending_count=1,
+        )
+        db.session.add(update)
+        db.session.flush()
+        db.session.add(
+            SiteUpdateDelivery(
+                site_update_id=update.id,
+                recipient_name="Queue User",
+                recipient_email="queue@example.com",
+                channel="email",
+                status="pending",
+            )
+        )
+        db.session.commit()
+        update_id = update.id
+
+    def fake_send_email(to_email, subject, text_body, html_body=None):
+        return True
+
+    monkeypatch.setattr("app.services.broadcasts.send_email", fake_send_email)
+
+    login(client, "admin-manual-queue@example.com", "pass12345")
+    response = client.post(
+        "/admin/updates/process-queue",
+        data={"return_to": "/admin/updates?page=1"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code in (301, 302)
+    assert "/admin/updates?page=1" in response.location
+
+    with app.app_context():
+        refreshed = db.session.get(SiteUpdate, update_id)
+        assert refreshed.broadcast_pending_count == 0
+        assert refreshed.broadcast_success_count == 1
+        assert refreshed.broadcast_failure_count == 0
+
+
+def test_non_admin_cannot_process_queue_manually(app, client):
+    with app.app_context():
+        create_user("client-manual-queue@example.com", "pass12345", role="client")
+
+    login(client, "client-manual-queue@example.com", "pass12345")
+    response = client.post("/admin/updates/process-queue")
+    assert response.status_code == 403
