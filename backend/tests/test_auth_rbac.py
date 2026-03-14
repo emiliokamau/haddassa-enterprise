@@ -66,6 +66,40 @@ def test_admin_can_access_admin_dashboard(app, client):
     assert response.status_code == 200
 
 
+def test_admin_login_redirects_to_admin_dashboard(app, client):
+    with app.app_context():
+        create_user("adminredirect@example.com", "pass12345", role="admin")
+
+    response = client.post(
+        "/auth/login",
+        data={"email": "adminredirect@example.com", "password": "pass12345"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code in (301, 302)
+    assert "/admin/dashboard" in response.location
+
+
+def test_admin_2fa_login_redirects_to_admin_dashboard(app, client, monkeypatch):
+    with app.app_context():
+        admin = create_2fa_user("admin2fa@example.com", "pass12345", role="admin")
+        admin_id = admin.id
+
+    with client.session_transaction() as sess:
+        sess["pending_2fa_user_id"] = admin_id
+
+    monkeypatch.setattr(auth_routes, "_verify_pending_sms_otp", lambda _code: True)
+
+    response = client.post(
+        "/auth/2fa",
+        data={"otp_code": "123456"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code in (301, 302)
+    assert "/admin/dashboard" in response.location
+
+
 def test_login_redirects_to_2fa_when_enabled(app, client):
     with app.app_context():
         create_2fa_user("secure@example.com", "pass12345", role="client")
@@ -142,3 +176,33 @@ def test_password_reset_updates_password(app, client):
         follow_redirects=False,
     )
     assert login.status_code in (301, 302)
+
+
+def test_client_login_redirects_to_client_dashboard(app, client):
+    with app.app_context():
+        create_user("clientredirect@example.com", "pass12345", role="client")
+
+    response = client.post(
+        "/auth/login",
+        data={"email": "clientredirect@example.com", "password": "pass12345"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code in (301, 302)
+    assert "/client/dashboard" in response.location
+
+
+def test_authenticated_user_sees_2fa_security_link(app, client):
+    with app.app_context():
+        create_user("twofalink@example.com", "pass12345", role="client")
+
+    login = client.post(
+        "/auth/login",
+        data={"email": "twofalink@example.com", "password": "pass12345"},
+        follow_redirects=False,
+    )
+    assert login.status_code in (301, 302)
+
+    response = client.get("/", follow_redirects=True)
+    assert response.status_code == 200
+    assert b"/auth/2fa/setup" in response.data

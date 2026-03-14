@@ -38,12 +38,14 @@
                 {% if current_user.role == 'client' %}
                     <a href="{{ url_for('client.dashboard') }}">Dashboard</a>
                     <a href="{{ url_for('client.filings') }}">My Filings</a>
+                    <a href="{{ url_for('auth.setup_two_factor') }}">2FA Security</a>
                 {% elif current_user.role == 'admin' %}
                     <a href="{{ url_for('admin.dashboard') }}">Admin</a>
                     <a href="{{ url_for('admin.clients') }}">Clients</a>
                     <a href="{{ url_for('admin.filings') }}">Filings</a>
                     <a href="{{ url_for('admin.bookings') }}">Bookings</a>
                     <a href="{{ url_for('admin.updates') }}">Updates</a>
+                    <a href="{{ url_for('auth.setup_two_factor') }}">2FA Security</a>
                 {% endif %}
                 <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -78,12 +80,14 @@
             {% if current_user.role == 'client' %}
                 <a href="{{ url_for('client.dashboard') }}">Dashboard</a>
                 <a href="{{ url_for('client.filings') }}">My Filings</a>
+                <a href="{{ url_for('auth.setup_two_factor') }}">2FA Security</a>
             {% elif current_user.role == 'admin' %}
                 <a href="{{ url_for('admin.dashboard') }}">Admin</a>
                 <a href="{{ url_for('admin.clients') }}">Clients</a>
                 <a href="{{ url_for('admin.filings') }}">Filings</a>
                 <a href="{{ url_for('admin.bookings') }}">Bookings</a>
                 <a href="{{ url_for('admin.updates') }}">Updates</a>
+                <a href="{{ url_for('auth.setup_two_factor') }}">2FA Security</a>
             {% endif %}
             <form method="post" action="{{ url_for('auth.logout') }}" class="mobile-drawer-logout">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
