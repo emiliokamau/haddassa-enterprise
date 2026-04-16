@@ -1,0 +1,22 @@
+{# Macro to render LRIP containers easily.
+   Usage:
+   {% import '_lrip_macros.html' as lrip_macros %}
+   {{ lrip_macros.lrip_container(id='lrip-1', cloud=cloud_url, placeholder=placeholder, container_class='bg-container') }}
+#}
+
+{% macro lrip_container(id=None, cloud='', placeholder='', transform='f_auto,q_auto', container_class='', extra_classes='') -%}
+  {%- set attrs = [] -%}
+  {%- if id -%}
+    {%- set _ = attrs.append('id="' ~ id ~ '"') -%}
+  {%- endif -%}
+  {%- if container_class -%}
+    {%- set _ = attrs.append('class="' ~ container_class ~ ' ' ~ extra_classes ~ '"') -%}
+  {%- elif extra_classes -%}
+    {%- set _ = attrs.append('class="' ~ extra_classes ~ '"') -%}
+  {%- endif -%}
+  {%- set _ = attrs.append('data-cloudinary="' ~ (cloud or '') ~ '"') -%}
+  {%- set _ = attrs.append('data-placeholder="' ~ (placeholder or '') ~ '"') -%}
+  {%- set _ = attrs.append('data-transform="' ~ transform ~ '"') -%}
+
+  <div {{ attrs|join(' ')|safe }}></div>
+{%- endmacro %}

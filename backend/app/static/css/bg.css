@@ -1,0 +1,57 @@
+.bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The Placeholder Layer */
+.bg-placeholder {
+  position: absolute;
+  background-size: cover;
+  background-position: center center;
+  filter: blur(20px);
+  transform: scale(1.1);
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.4s ease-out;
+}
+
+/* The Real Image Layer */
+.bg-main {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center center;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+/* When main image is visible, hide placeholder slightly earlier */
+.bg-main.visible + .bg-placeholder {
+  opacity: 0;
+}
+
+/* Per-service LRIP container used inside article blocks */
+.service-lrip {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.service-lrip .bg-main,
+.service-lrip .bg-placeholder {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+}

@@ -1,0 +1,22 @@
+{
+  "Audit": {
+    "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776337886/audit_h4kpp0.png",
+    "placeholder": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAlgCWAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////2wBDAVVaWnhpeOuCguv/////////////////////////////////////////////////////////////////////////wAARCAALABQDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAIDBP/EAB0QAQADAQACAwAAAAAAAAAAAAEAAhEhAxIiMUH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A0Ws69/Itte4Oa9iir1menku+ZPZzYFC5XS56u/UJJ+VrL12ED//Z"
+  },
+  "Bookkeeping": {
+    "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776345415/book_keeping_ytgibz.jpg",
+    "placeholder": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAlgCWAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////2wBDAVVaWnhpeOuCguv/////////////////////////////////////////////////////////////////////////wAARCAANABQDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAIDAf/EAB4QAAMAAgEFAAAAAAAAAAAAAAABAhFRMQMSIYGR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAQL/xAAVEQEBAAAAAAAAAAAAAAAAAAAAEf/aAAwDAQACEQMRAD8A2IjGKXtjTE7axokus+3hCxbpvKWwKiu1xS+gKl4AmmP/2Q=="
+  },
+  "Tax Services": {
+    "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776337951/returns_fafvvi.png",
+    "placeholder": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAlgCWAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////2wBDAVVaWnhpeOuCguv/////////////////////////////////////////////////////////////////////////wAARCAALABQDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAMBAv/EAB0QAAICAgMBAAAAAAAAAAAAAAECABEDIRIxQWH/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABURAQEAAAAAAAAAAAAAAAAAAAAR/9oADAMBAAIRAxEAPwCxcKLyNd9Vcmrqch4rV+GTxMSVUnR8nY0V+9yKEMCbA2bibk20RSP/2Q=="
+  },
+  "Company & Business Name Registration": {
+    "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776337928/comp_registration_gkg7oi.png",
+    "placeholder": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAlgCWAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////2wBDAVVaWnhpeOuCguv/////////////////////////////////////////////////////////////////////////wAARCAALABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAIEAQP/xAAeEAACAgICAwAAAAAAAAAAAAABAgARAxIEIUFhcf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AVAwAK0AamuzJR2vq7lAVdyK6HiTcrpqAAHyB1TNkZQdb9wi4CRiWjCFf/9k="
+  },
+  "Home Background": {
+    "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776345430/home_qtqmav.jpg",
+    "placeholder": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAlgCWAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////2wBDAVVaWnhpeOuCguv/////////////////////////////////////////////////////////////////////////wAARCAAeABQDASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAAMBAgT/xAAeEAEAAwACAgMAAAAAAAAAAAABAAIRAyESkSIxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAEC/8QAFhEBAQEAAAAAAAAAAAAAAAAAAAEh/9oADAMBAAIRAxEAPwDNUH2EuUEHv8kcQWNSOtStaFnPUCz2qeTmZCQvfWwiDOMw6jW61yJ41CMs5U6NhTCrU+T9wlW7sJWJ1//Z"
+  }
+}

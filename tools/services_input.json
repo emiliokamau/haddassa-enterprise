@@ -1,0 +1,7 @@
+{
+  "Audit": { "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776337886/audit_h4kpp0.png", "placeholder": "data:image/jpeg;base64,..." },
+  "Bookkeeping": { "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776345415/book_keeping_ytgibz.jpg", "placeholder": "data:image/jpeg;base64,..." },
+  "Tax Services": { "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776337951/returns_fafvvi.png", "placeholder": "data:image/jpeg;base64,..." },
+  "Company & Business Name Registration": { "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776337928/comp_registration_gkg7oi.png", "placeholder": "data:image/jpeg;base64,..." },
+  "Home Background": { "cloudinary": "https://res.cloudinary.com/dlddotveg/image/upload/v1776345430/home_qtqmav.jpg", "placeholder": "data:image/jpeg;base64,..." }
+}
