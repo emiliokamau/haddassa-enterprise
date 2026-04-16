@@ -6,23 +6,35 @@
 {% block content %}
 <section class="content-panel">
     <h1>Services</h1>
+    {%- import '_lrip_macros.html' as lrip_macros -%}
     <div class="feature-grid">
-        <article>
-            <h2>Audit</h2>
-            <p>Financial statement reviews and audit support for reliable reporting.</p>
-        </article>
-        <article>
-            <h2>Bookkeeping</h2>
-            <p>Monthly bookkeeping to maintain clean records and better decision making.</p>
-        </article>
-        <article>
-            <h2>Tax Services</h2>
-            <p>Support for VAT, PAYE, TOT, MRI, Catering Levy, NSSF, and SHA returns.</p>
-        </article>
-        <article>
-            <h2>Company &amp; Business Name Registration</h2>
-            <p>Guided registration support to formalize your business correctly.</p>
-        </article>
+        {%- if SERVICES and SERVICES | length > 0 -%}
+            {%- for name, meta in SERVICES.items() -%}
+                <article>
+                    <h2>{{ name }}</h2>
+                    <p>{{ meta.description or '' }}</p>
+                    {# LRIP container specific to this service using macro #}
+                    {{ lrip_macros.lrip_container(id='lrip-service-' ~ loop.index, cloud=meta.cloudinary or '', placeholder=meta.placeholder or '', transform='f_auto,q_auto', container_class='service-lrip') }}
+                </article>
+            {%- endfor -%}
+        {%- else -%}
+            <article>
+                <h2>Audit</h2>
+                <p>Financial statement reviews and audit support for reliable reporting.</p>
+            </article>
+            <article>
+                <h2>Bookkeeping</h2>
+                <p>Monthly bookkeeping to maintain clean records and better decision making.</p>
+            </article>
+            <article>
+                <h2>Tax Services</h2>
+                <p>Support for VAT, PAYE, TOT, MRI, Catering Levy, NSSF, and SHA returns.</p>
+            </article>
+            <article>
+                <h2>Company &amp; Business Name Registration</h2>
+                <p>Guided registration support to formalize your business correctly.</p>
+            </article>
+        {%- endif -%}
     </div>
 
     <h2 class="section-gap">Recurring Compliance</h2>
@@ -31,4 +43,25 @@
 
     <a class="button" href="{{ url_for('public.book_consultation') }}">Schedule Consultation</a>
 </section>
+{# Debug panel: shows service keys and whether cloudinary/placeholder exist. Visible when ?debug=1 is added to the URL. #}
+{% if request.args.get('debug') == '1' %}
+<section class="content-panel debug-panel" aria-live="polite">
+    <h2>Debug: Services Loaded</h2>
+    <table>
+        <thead><tr><th>Service</th><th>cloudinary</th><th>placeholder</th><th>description</th></tr></thead>
+        <tbody>
+        {%- for name, meta in SERVICES.items() -%}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ (meta.cloudinary is defined and meta.cloudinary) and 'yes' or 'no' }}</td>
+                <td>{{ (meta.placeholder is defined and meta.placeholder) and ('yes (' ~ (meta.placeholder|length) ~ ' chars)') or 'no' }}</td>
+                <td>{{ meta.description or '' }}</td>
+            </tr>
+        {%- else -%}
+            <tr><td colspan="4">No SERVICES configured</td></tr>
+        {%- endfor -%}
+        </tbody>
+    </table>
+</section>
+{% endif %}
 {% endblock %}
