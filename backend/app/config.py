@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+import json
 
 from dotenv import load_dotenv
 
@@ -59,6 +60,64 @@ class Config:
     X_CONTENT_TYPE_OPTIONS = "nosniff"
     X_FRAME_OPTIONS = "DENY"
     REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+    # Cloudinary background settings for home page
+    CLOUDINARY_BG_URL = os.getenv("CLOUDINARY_BG_URL", "")
+    CLOUDINARY_PLACEHOLDER = os.getenv("CLOUDINARY_PLACEHOLDER", "")
+
+    # Per-service image configuration. Provide a JSON object in env var SERVICES_JSON.
+    # Example: '{"Audit": {"cloudinary": "https://.../audit.jpg", "placeholder": "data:image/jpeg;base64,..."}}'
+    _services_json = os.getenv("SERVICES_JSON", "{}")
+    try:
+        SERVICES = json.loads(_services_json) if _services_json else {}
+    except Exception:
+        SERVICES = {}
+
+    # Backwards-compatible simple mapping: SERVICES_DELIVERY_URLS accepts
+    # newline or comma separated key=value pairs. Example:
+    # Audit=https://.../audit.jpg,Bookkeeping=https://.../books.jpg
+    _simple_map = os.getenv("SERVICES_DELIVERY_URLS", "").strip()
+    if _simple_map:
+        try:
+            # Split on newlines or commas
+            parts = [p.strip() for p in _simple_map.replace('\n', ',').split(',') if p.strip()]
+            for part in parts:
+                if '=' not in part:
+                    continue
+                key, val = part.split('=', 1)
+                key = key.strip()
+                val = val.strip()
+                if not key or not val:
+                    continue
+                # Ensure SERVICES has an entry for this key
+                SERVICES.setdefault(key, {})
+                SERVICES[key].setdefault('cloudinary', val)
+        except Exception:
+            # Ignore malformed simple maps; keep SERVICES as-is
+            pass
+
+    # If SERVICES is empty and a local developer placeholder file exists, load it as a fallback.
+    if not SERVICES:
+        try:
+            fallback_path = BASE_DIR.parent / 'tools' / 'services_with_placeholders.json'
+            if fallback_path.exists():
+                with open(fallback_path, 'r', encoding='utf-8') as fh:
+                    SERVICES = json.load(fh)
+        except Exception:
+            # swallow errors; leave SERVICES empty
+            SERVICES = SERVICES or {}
+
+    # Cloudinary API credentials (read from environment). These are available
+    # to server-side code via app.config. Do NOT expose secrets to templates.
+    CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+    CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "")
+    CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
+
+    # Derive a recommended base delivery URL from the cloud name when provided.
+    if CLOUDINARY_CLOUD_NAME:
+        CLOUDINARY_BASE_URL = f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/image/upload"
+    else:
+        CLOUDINARY_BASE_URL = os.getenv("CLOUDINARY_BASE_URL", "")
 
     # Email API integration (Resend)
     ENABLE_EMAIL_NOTIFICATIONS = os.getenv("ENABLE_EMAIL_NOTIFICATIONS", "true").lower() == "true"
