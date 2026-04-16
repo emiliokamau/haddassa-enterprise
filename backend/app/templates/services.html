@@ -7,9 +7,10 @@
 <section class="content-panel">
     <h1>Services</h1>
     {%- import '_lrip_macros.html' as lrip_macros -%}
+    {%- set services_map = SERVICES|default({}) -%}
     <div class="feature-grid">
-        {%- if SERVICES and SERVICES | length > 0 -%}
-            {%- for name, meta in SERVICES.items() -%}
+        {%- if services_map and services_map | length > 0 -%}
+            {%- for name, meta in services_map.items() -%}
                 <article>
                     <h2>{{ name }}</h2>
                     <p>{{ meta.description or '' }}</p>
@@ -50,7 +51,7 @@
     <table>
         <thead><tr><th>Service</th><th>cloudinary</th><th>placeholder</th><th>description</th></tr></thead>
         <tbody>
-        {%- for name, meta in SERVICES.items() -%}
+        {%- for name, meta in services_map.items() -%}
             <tr>
                 <td>{{ name }}</td>
                 <td>{{ (meta.cloudinary is defined and meta.cloudinary) and 'yes' or 'no' }}</td>
