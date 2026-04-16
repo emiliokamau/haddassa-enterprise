@@ -12,10 +12,10 @@
         {%- if services_map and services_map | length > 0 -%}
             {%- for name, meta in services_map.items() -%}
                 <article>
+                    {# LRIP container specific to this service using macro (image first) #}
+                    {{ lrip_macros.lrip_container(id='lrip-service-' ~ loop.index, cloud=meta.cloudinary or '', placeholder=meta.placeholder or '', transform='f_auto,q_auto', container_class='service-lrip') }}
                     <h2>{{ name }}</h2>
                     <p>{{ meta.description or '' }}</p>
-                    {# LRIP container specific to this service using macro #}
-                    {{ lrip_macros.lrip_container(id='lrip-service-' ~ loop.index, cloud=meta.cloudinary or '', placeholder=meta.placeholder or '', transform='f_auto,q_auto', container_class='service-lrip') }}
                 </article>
             {%- endfor -%}
         {%- else -%}

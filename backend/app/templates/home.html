@@ -4,6 +4,13 @@
 {% block meta_description %}Tax consulting and accountancy support for Kenyan businesses and individuals.{% endblock %}
 
 {% block content %}
+{%- import '_lrip_macros.html' as lrip_macros -%}
+{%- set services_map = SERVICES|default({}) -%}
+{# Home background: prefer explicit CLOUDINARY_BG_URL, otherwise use SERVICES['Home Background'] #}
+{%- set home_cloud = CLOUDINARY_BG_URL or (services_map['Home Background'].cloudinary if services_map['Home Background'] is defined else '') -%}
+{%- set home_placeholder = CLOUDINARY_PLACEHOLDER or (services_map['Home Background'].placeholder if services_map['Home Background'] is defined else '') -%}
+{{ lrip_macros.lrip_container(id='lrip-bg', cloud=home_cloud, placeholder=home_placeholder, transform='f_auto,q_auto', container_class='bg-container') }}
+
 <section class="hero">
     <h1>Tax Compliance and Accountancy Support You Can Trust</h1>
     <p>

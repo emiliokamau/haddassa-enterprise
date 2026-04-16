@@ -9,9 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bg.css') }}">
 </head>
 <body>
-{%- import '_lrip_macros.html' as lrip_macros -%}
-<!-- Background LRIP container (placeholder + high-res swap). -->
-{{ lrip_macros.lrip_container(id='lrip-bg', cloud=CLOUDINARY_BG_URL, placeholder=CLOUDINARY_PLACEHOLDER|default(''), transform='f_auto,q_auto', container_class='bg-container') }}
+{# Global background is now provided per-page (e.g., home). Use the LRIP macro inside page templates. #}
 <header class="site-header">
     <div class="container nav-wrapper">
         <a class="brand" href="{{ url_for('public.home') }}">
