@@ -99,6 +99,27 @@ def create_app(config_object=None):
             "SiteUpdateDelivery": SiteUpdateDelivery,
         }
 
+    @app.context_processor
+    def inject_cloudinary_url():
+        # Expose the Cloudinary background URL to templates. Prefer app config, fall back to env.
+        import os
+
+        cloud_url = app.config.get("CLOUDINARY_BG_URL") or os.getenv("CLOUDINARY_BG_URL", "")
+        placeholder = app.config.get("CLOUDINARY_PLACEHOLDER") or os.getenv("CLOUDINARY_PLACEHOLDER", "")
+        services = app.config.get("SERVICES") or {}
+
+        # Safe-to-expose Cloudinary values for templates (do not include secrets)
+        cloud_name = app.config.get("CLOUDINARY_CLOUD_NAME") or os.getenv("CLOUDINARY_CLOUD_NAME", "")
+        base_url = app.config.get("CLOUDINARY_BASE_URL") or os.getenv("CLOUDINARY_BASE_URL", "")
+
+        return {
+            "CLOUDINARY_BG_URL": cloud_url,
+            "CLOUDINARY_PLACEHOLDER": placeholder,
+            "SERVICES": services,
+            "CLOUDINARY_CLOUD_NAME": cloud_name,
+            "CLOUDINARY_BASE_URL": base_url,
+        }
+
     @app.route("/health")
     def health_check():
         return jsonify({"status": "ok"}), 200
